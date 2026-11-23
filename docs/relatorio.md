@@ -24,7 +24,7 @@ Desde sua concepção, o FydelisTech OS vem sendo construído segundo princípio
 
 ### 1️⃣ Fydelis-Cipher — Cifra de Bloco Nativa
 
-**Arquivo:** `grafico/cifra/fydcipher.asm`
+**Arquivo:** `segurancafydcipher.asm`
 
 Cifra de bloco projetada especificamente para o FydelisTech OS, concebida, analisada e codificada em Assembly durante o desenvolvimento do sistema.
 
@@ -44,7 +44,7 @@ Opera com estrutura de chave independente, agendamento de subchaves baseado em d
 
 ### 2️⃣ FYDB — Banco de Dados Nativo do Kernel
 
-**Arquivo:** `kernel/fydb.asm`
+**Arquivo:** `seguranca/fydb.asm`
 
 Sistema de banco de dados estruturado operando diretamente sobre a camada de arquivos do sistema operacional, sem dependência de SGBDs externos.
 
@@ -77,7 +77,7 @@ Biblioteca de funções criptográficas essenciais implementadas em Assembly pur
 
 ### 4️⃣ FydPerm — Sistema Nativo de Controle de Acesso e Permissões
 
-**Arquivo:** `kernel/fydperm.asm`
+**Arquivo:** `seguranca/fydperm.asm`
 
 Modelo de permissões projetado para o FydelisTech OS, operando em conjunto com o banco de dados e o sistema de arquivos.
 
