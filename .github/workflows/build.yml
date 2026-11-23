@@ -1,0 +1,108 @@
+name: Build FydelisTech OS
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar codigo-fonte
+        uses: actions/checkout@v4
+
+      - name: Verificar estrutura de pastas e includes
+        run: |
+          pwd
+          ls -la
+          ls -la include/syscalls/ || ls -la src/include/syscalls/ || true
+
+      - name: Instalar toolchain (NASM, GCC, UEFI/GPT tools, genisoimage)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y nasm gcc binutils make python3 python3-pil python3-cairosvg genisoimage gdisk dosfstools mtools osslsigncode
+
+      - name: Compilar Kernel, Gravar Wallpapers e Gerar ISO
+        run: |
+          make -C kernel clean
+          make -C kernel all
+
+      - name: Montar Imagem Hibrida UEFI + Legacy BIOS (kernel/fydelterm.img)
+        run: |
+          set -e
+          IMG="kernel/fydelterm.img"
+          KERNEL_BIN="kernel/kernel.bin"
+
+          # Localiza BOOTX64.EFI ja assinado ou compila boot/boot_uefi.asm
+          EFI_BIN=$(find . -maxdepth 4 -name "BOOTX64.EFI" | head -n 1)
+          if [ -z "$EFI_BIN" ] && [ -f "boot/boot_uefi.asm" ]; then
+            nasm -f bin boot/boot_uefi.asm -o boot/BOOTX64.EFI
+            EFI_BIN="boot/BOOTX64.EFI"
+            if [ -f "boot/keys/DB.pfx" ]; then
+              osslsigncode sign -pkcs12 boot/keys/DB.pfx -pass "fydelis" -h sha256 \
+                -n "FydelisTech OS Bootloader" -in "$EFI_BIN" -out "${EFI_BIN}.signed"
+              mv "${EFI_BIN}.signed" "$EFI_BIN"
+            fi
+          fi
+
+          # Localiza mbr.bin (Legacy BIOS) se existir
+          MBR_BIN=$(find . -maxdepth 3 -name "mbr.bin" | head -n 1)
+
+          # 1. Cria disco bruto de 64 MB (131072 setores de 512 bytes)
+          dd if=/dev/zero of="$IMG" bs=1M count=64 status=none
+
+          # 2. Cria tabela GPT com particao EFI (EF00) iniciando no LBA 8192
+          sgdisk -o "$IMG" >/dev/null
+          sgdisk -n 1:8192:131000 -t 1:EF00 -c 1:"FYDELIS_ESP" "$IMG" >/dev/null
+
+          # 3. Grava kernel.bin no LBA 4096 (offset 2097152 bytes)
+          dd if="$KERNEL_BIN" of="$IMG" bs=512 seek=4096 conv=notrunc status=none
+
+          # 4. Monta particao FAT32 (ESP) com BOOTX64.EFI e certificados .cer
+          ESP_SECTORS=$((131000 - 8192 + 1))
+          dd if=/dev/zero of=esp.part bs=512 count=$ESP_SECTORS status=none
+          mkfs.fat -F 32 -n "FYDELISOS" esp.part >/dev/null
+
+          mmd -i esp.part ::/EFI
+          mmd -i esp.part ::/EFI/BOOT
+          if [ -n "$EFI_BIN" ] && [ -f "$EFI_BIN" ]; then
+            mcopy -i esp.part "$EFI_BIN" ::/EFI/BOOT/BOOTX64.EFI
+          fi
+
+          for cert in PK.cer KEK.cer DB.cer; do
+            CERT_PATH=$(find . -maxdepth 4 -name "$cert" | head -n 1)
+            [ -n "$CERT_PATH" ] && mcopy -i esp.part "$CERT_PATH" "::/$cert"
+          done
+
+          dd if=esp.part of="$IMG" bs=512 seek=8192 conv=notrunc status=none
+          rm -f esp.part
+
+          # 5. Injeta codigo Legacy BIOS MBR nos primeiros 440 bytes sem tocar na tabela GPT
+          if [ -n "$MBR_BIN" ] && [ -f "$MBR_BIN" ]; then
+            dd if="$MBR_BIN" of="$IMG" bs=440 count=1 conv=notrunc status=none
+          fi
+
+          # 6. Sincroniza backup GPT no final da imagem
+          sgdisk -e "$IMG" >/dev/null
+          ls -lh "$IMG"
+
+      - name: Publicar artefatos (fydelterm.img, fydelterm.iso e kernel.bin)
+        uses: actions/upload-artifact@v4
+        with:
+          name: FydelisTechOS-build
+          path: |
+            kernel/fydelterm.img
+            kernel/fydelterm.iso
+            kernel/kernel.bin
+
+      - name: Criar Release Publica (ao enviar tag v*)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            kernel/fydelterm.img
+            kernel/fydelterm.iso

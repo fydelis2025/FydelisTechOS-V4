@@ -1,0 +1,9 @@
+{
+    "ultimaVersao": "2.0.0",
+    "dataLancamento": "2026-09-18",
+    "logMudancas": "✅ Novo FydelisGuard — Firewall integrado\n✅ Novo Antivírus FydelisAV\n✅ Gerenciador de Serviços\n✅ Melhorias no sistema de temas",
+    "urlDownload": "https://seusite.com/downloads/FydelisTechOS-Setup-v2.0.0.exe",
+    "tamanhoBytes": 85200000,
+    "hashSHA256": "abc123def456...",
+    "critico": true
+}

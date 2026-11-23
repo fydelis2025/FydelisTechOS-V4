@@ -1,0 +1,25 @@
+# Artefatos de compilação e montagem
+build/
+kernel/build/
+*.o
+*.d
+*.bin
+*.map
+*.img
+*.iso
+*.efi
+*.vdi
+
+# Cópia local gerada do BOOTX64.EFI para a ESP de teste
+esp/EFI/BOOT/BOOTX64.EFI
+
+# Chaves privadas e certificados pessoais (nunca versionar chaves privadas)
+*.pfx
+*.key
+*.pem
+
+# Arquivos temporários do sistema / editores
+.DS_Store
+Thumbs.db
+*.swp
+*~
