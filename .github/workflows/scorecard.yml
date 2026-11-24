@@ -25,7 +25,7 @@ jobs:
       - name: Install OpenSSF Scorecard CLI
         run: |
           set -euo pipefail
-          go install github.com/ossf/scorecard/v5/cmd/scorecard@latest
+          go install github.com/ossf/scorecard/v5@latest
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
 
       - name: Run OpenSSF Scorecard
