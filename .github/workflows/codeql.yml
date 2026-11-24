@@ -46,7 +46,6 @@ jobs:
         shell: bash
         run: |
           echo "🔨 Construindo FydelisTechOS..."
-          make clean
           make all
           echo "✅ Build concluído"
 
