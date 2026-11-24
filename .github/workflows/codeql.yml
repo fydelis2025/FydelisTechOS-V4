@@ -23,7 +23,7 @@ jobs:
       matrix:
         include:
           - language: c-cpp
-            build-mode: manual   # ⚠️ O mais importante! Sem build padrão
+            build-mode: manual   # Build manual para código bare-metal
           - language: python
             build-mode: none
           - language: actions
@@ -40,7 +40,7 @@ jobs:
           build-mode: ${{ matrix.build-mode }}
           queries: security-extended,security-and-quality
 
-      # 🔧 PASSO DE BUILD MANUAL — essencial para código bare-metal
+      # 🔧 Build manual — sem 'make clean' que estava causando o erro
       - name: Build FydelisTechOS (manual)
         if: matrix.build-mode == 'manual'
         shell: bash
