@@ -15,7 +15,7 @@
 
 [![CodeQL - FydelisTechOS](https://github.com/fydelis2025/FydelisTechOS-V4/actions/workflows/codeql.yml/badge.svg)](https://github.com/fydelis2025/FydelisTechOS-V4/actions/workflows/codeql.yml)
 [![OpenSSF Scorecard Workflow](https://github.com/fydelis2025/FydelisTechOS-V4/actions/workflows/scorecard.yml/badge.svg)](https://github.com/fydelis2025/FydelisTechOS-V4/actions/workflows/scorecard.yml)
-[![OpenSSF Scorecard](https://img.shields.io/badge/OpenSSF%20Scorecard-X.X%2F10-blue)](https://github.com/fydelis2025/FydelisTechOS-V4/actions/workflows/scorecard.yml)
+<!--[![OpenSSF Scorecard](https://img.shields.io/badge/OpenSSF%20Scorecard-X.X%2F10-blue)](https://github.com/fydelis2025/FydelisTechOS-V4/actions/workflows/scorecard.yml)!-->
 
 
 Bem-vindo ao centro oficial de documentação do **FydelisTechOS — V2**. Aqui você encontra a visão completa do projeto: sua história, arquitetura, estado atual e os caminhos percorridos até chegar onde estamos.
