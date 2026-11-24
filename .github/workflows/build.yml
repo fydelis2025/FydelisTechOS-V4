@@ -99,7 +99,7 @@ jobs:
 
       - name: Criar Release Publica (ao enviar tag v*)
         if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@<SHA_EXATO_DA_TAG_v2.0.9> # v2.0.9
+        uses: softprops/action-gh-release@63e7de7e39d7dc0bdc6dfbed71e0abb9d182910b # v2.0.9
         with:
           files: |
             kernel/fydelterm.img
