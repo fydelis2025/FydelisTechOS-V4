@@ -449,6 +449,7 @@ static size_t str_len(const char *s) {
 
 static int __attribute__((unused)) str_eq(const char *a, const char *b) {
     size_t i = 0;
+    if (!a || !b) return 0;
     while (a[i] && b[i]) {
         if (a[i] != b[i]) return 0;
         i++;
@@ -579,9 +580,10 @@ static int carregar_wallpaper_ata(uint32_t lba_inicial) {
         return 0;
     }
 
-    uint16_t *ptr = (uint16_t *)bg_buffer_ram;
+    uint8_t *ptr = (uint8_t *)bg_buffer_ram;
     for (uint32_t s = 0; s < BG_SETORES; s++) {
-        if (ata_ler_setor_pio28(lba_inicial + s, ptr + (s * 256)) != 0) {
+        uint8_t *setor_ptr = ptr + ((size_t)s * 512u);
+        if (ata_ler_setor_pio28(lba_inicial + s, (uint16_t *)setor_ptr) != 0) {
             lba_bg_carregado = 0;
             return 0;
         }
@@ -1587,7 +1589,7 @@ static void exibir_tela_login(int L, int A) {
 }
 
 //painel de controle
-#define FYD_LAYOUT_TECLADO_ABNT2 1
+//#define FYD_LAYOUT_TECLADO_ABNT2 1
 
 typedef struct {
     int  aberta;
@@ -2364,21 +2366,21 @@ static int exibir_desktop_grafico(int L, int A) {
     int drag_offset_x  = 0;
     int drag_offset_y  = 0;
 
-    int arrastando_calc = 0;
-    int calc_drag_off_x = 0;
-    int calc_drag_off_y = 0;
+    int arrastando_calc  = 0;
+    int calc_drag_off_x  = 0;
+    int calc_drag_off_y  = 0;
 
-    int arrastando_logs = 0;
-    int logs_drag_off_x = 0;
-    int logs_drag_off_y = 0;
+    int arrastando_logs  = 0;
+    int logs_drag_off_x  = 0;
+    int logs_drag_off_y  = 0;
 
-    int arrastando_exp  = 0;
-    int exp_drag_off_x  = 0;
-    int exp_drag_off_y  = 0;
+    int arrastando_exp   = 0;
+    int exp_drag_off_x   = 0;
+    int exp_drag_off_y   = 0;
 
-    int arrastando_brw  = 0;
-    int brw_drag_off_x  = 0;
-    int brw_drag_off_y  = 0;
+    int arrastando_brw   = 0;
+    int brw_drag_off_x   = 0;
+    int brw_drag_off_y   = 0;
 
     int arrastando_notes = 0;
     int notes_drag_off_x = 0;
@@ -2394,7 +2396,7 @@ static int exibir_desktop_grafico(int L, int A) {
     int menu_aberto    = 0;
     int menu_x         = 8;
     int menu_w         = 410;
-    int menu_h         = 372; 
+    int menu_h         = 372;
     int menu_y         = taskbar_y - menu_h - 4;
 
     int precisa_redesenhar = 1;
@@ -2417,9 +2419,8 @@ static int exibir_desktop_grafico(int L, int A) {
 
     RtcDataHora dt_atual;
     rtc_ler_agora(&dt_atual);
-    int hora_local = (int)dt_atual.hora + offset_fuso;
-    if (hora_local < 0)   hora_local += 24;
-    if (hora_local >= 24) hora_local -= 24;
+    int hora_local = ((int)dt_atual.hora + offset_fuso) % 24;
+    if (hora_local < 0) hora_local += 24;
     dt_atual.hora = (uint8_t)hora_local;
 
     uint8_t min_anterior   = dt_atual.min;
@@ -2429,14 +2430,22 @@ static int exibir_desktop_grafico(int L, int A) {
     str_copy(res_buf, "Video VESA    : ", sizeof(res_buf));
     num_para_str(L, tmp, sizeof(tmp));
     size_t pos = str_len(res_buf);
-    str_copy(res_buf + pos, tmp, sizeof(res_buf) - pos);
+    if (pos < sizeof(res_buf) - 1) {
+        str_copy(res_buf + pos, tmp, sizeof(res_buf) - pos);
+    }
     pos = str_len(res_buf);
-    str_copy(res_buf + pos, "x", sizeof(res_buf) - pos);
+    if (pos < sizeof(res_buf) - 1) {
+        str_copy(res_buf + pos, "x", sizeof(res_buf) - pos);
+    }
     num_para_str(A, tmp, sizeof(tmp));
     pos = str_len(res_buf);
-    str_copy(res_buf + pos, tmp, sizeof(res_buf) - pos);
+    if (pos < sizeof(res_buf) - 1) {
+        str_copy(res_buf + pos, tmp, sizeof(res_buf) - pos);
+    }
     pos = str_len(res_buf);
-    str_copy(res_buf + pos, " @ 32-bit", sizeof(res_buf) - pos);
+    if (pos < sizeof(res_buf) - 1) {
+        str_copy(res_buf + pos, " @ 32-bit", sizeof(res_buf) - pos);
+    }
 
     uint64_t tsc_anterior  = ler_tsc();
     uint64_t ciclos_ativos = 0;
@@ -2456,9 +2465,8 @@ static int exibir_desktop_grafico(int L, int A) {
             ciclos_poll = 0;
 
             rtc_ler_agora(&dt_atual);
-            hora_local = (int)dt_atual.hora + offset_fuso;
-            if (hora_local < 0)   hora_local += 24;
-            if (hora_local >= 24) hora_local -= 24;
+            hora_local = ((int)dt_atual.hora + offset_fuso) % 24;
+            if (hora_local < 0) hora_local += 24;
             dt_atual.hora = (uint8_t)hora_local;
 
             int novo_link  = (rede_ler_status_link() != 0);
@@ -2726,10 +2734,15 @@ static int exibir_desktop_grafico(int L, int A) {
         if (dhcp_st_antes == 1 || dhcp_st_antes == 2) {
             dhcp_cliente_processar();
             if (dhcp_ler_status() == 3) {
-                eth_copiar_str(eth_status_msg, "DHCP Ativo: ", sizeof(eth_status_msg));
-                int p = eth_str_len(eth_status_msg);
-                eth_copiar_str(eth_status_msg + p, rede_ler_ip(), sizeof(eth_status_msg) - p);
-                precisa_redesenhar = 1;
+                const char *ip_atual = rede_ler_ip();
+                if (ip_atual && ip_atual[0] != '\0') {
+                    eth_copiar_str(eth_status_msg, "DHCP Ativo: ", sizeof(eth_status_msg));
+                    size_t p = (size_t)eth_str_len(eth_status_msg);
+                    if (p < sizeof(eth_status_msg) - 1) {
+                        eth_copiar_str(eth_status_msg + p, ip_atual, (int)(sizeof(eth_status_msg) - p));
+                    }
+                    precisa_redesenhar = 1;
+                }
             }
         }
 
@@ -2917,23 +2930,23 @@ static int exibir_desktop_grafico(int L, int A) {
                         int iw = (itens_menu[i].coluna == 0) ? (col_esq_w - 20) : (col_dir_w - 20);
 
                         if (ponto_no_retangulo(mx, my, ix, iy, iw, 32)) {
-			    int acao = itens_menu[i].acao_id;
-			    if (acao == 1)       { app_explorer.abrir(); }
-			    else if (acao == 2)  { modo_janela = MODO_JANELA_APPS;    janela_aberta = 1; }
-			    else if (acao == 3)  { cursor_restaurar_fundo(); return 0; }
-			    else if (acao == 4)  { modo_janela = MODO_JANELA_APPS;    janela_aberta = 1; }
-			    else if (acao == 5)  { modo_janela = MODO_JANELA_SISTEMA; janela_aberta = 1; }
-			    else if (acao == 6)  { janela_aberta = 0; painel_win7_abrir(); }
-			    else if (acao == 7)  { janela_aberta = 0; painel_win7_abrir(); }
-			    else if (acao == 8)  { app_calculadora.abrir(); }
-			    else if (acao == 9)  { app_visualizador_logs.abrir(); }
-			    else if (acao == 10) { app_browser.abrir(); }
-			    else if (acao == 11) { app_notepad.abrir(); }
+                            int acao = itens_menu[i].acao_id;
+                            if (acao == 1)       { app_explorer.abrir(); }
+                            else if (acao == 2)  { modo_janela = MODO_JANELA_APPS;    janela_aberta = 1; }
+                            else if (acao == 3)  { cursor_restaurar_fundo(); return 0; }
+                            else if (acao == 4)  { modo_janela = MODO_JANELA_APPS;    janela_aberta = 1; }
+                            else if (acao == 5)  { modo_janela = MODO_JANELA_SISTEMA; janela_aberta = 1; }
+                            else if (acao == 6)  { janela_aberta = 0; painel_win7_abrir(); }
+                            else if (acao == 7)  { janela_aberta = 0; painel_win7_abrir(); }
+                            else if (acao == 8)  { app_calculadora.abrir(); }
+                            else if (acao == 9)  { app_visualizador_logs.abrir(); }
+                            else if (acao == 10) { app_browser.abrir(); }
+                            else if (acao == 11) { app_notepad.abrir(); }
 
-			    menu_aberto = 0;
-			    precisa_redesenhar = 1;
-			    break;
-			}
+                            menu_aberto = 0;
+                            precisa_redesenhar = 1;
+                            break;
+                        }
                     }
                 }
             }
@@ -3006,13 +3019,11 @@ static int exibir_desktop_grafico(int L, int A) {
                     rel_y >= 3 && rel_y <= 23) {
                     app_calculadora.aberta = 0;
                     arrastando_calc = 0;
-                }
-                else if (rel_y >= 0 && rel_y <= 26) {
+                } else if (rel_y >= 0 && rel_y <= 26) {
                     arrastando_calc = 1;
                     calc_drag_off_x = rel_x;
                     calc_drag_off_y = rel_y;
-                }
-                else {
+                } else {
                     app_calculadora.on_click(rel_x, rel_y);
                 }
 
@@ -3036,6 +3047,7 @@ static int exibir_desktop_grafico(int L, int A) {
                 } else {
                     app_visualizador_logs.on_click(rel_x, rel_y);
                 }
+
                 menu_aberto = 0;
                 precisa_redesenhar = 1;
             }
