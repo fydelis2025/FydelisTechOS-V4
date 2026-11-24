@@ -9,7 +9,7 @@
 
 </div>
 
-<div align="center>
+<div align="center">
   
 [![CodeQL - FydelisTechOS](https://github.com/fydelis2025/FydelisTechOS-V4/actions/workflows/codeql.yml/badge.svg)](https://github.com/fydelis2025/FydelisTechOS-V4/actions/workflows/codeql.yml)
 [![OpenSSF Scorecard Workflow](https://github.com/fydelis2025/FydelisTechOS-V4/actions/workflows/scorecard.yml/badge.svg)](https://github.com/fydelis2025/FydelisTechOS-V4/actions/workflows/scorecard.yml)
