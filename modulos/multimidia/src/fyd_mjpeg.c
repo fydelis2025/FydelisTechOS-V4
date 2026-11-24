@@ -56,10 +56,10 @@ static const uint8_t FYD_ZIGZAG[64] = {
     53, 60, 61, 54, 47, 55, 62, 63
 };
 
-static uint8_t fyd_clamp_u8(int32_t v) {
-    if (v < 0) return 0;
-    if (v > 255) return 255;
-    return (uint8_t)v;
+static uint8_t fyd_clamp_u8(int32_t valor_bruto) {
+    if (valor_bruto < 0) return 0;
+    if (valor_bruto > 255) return 255;
+    return (uint8_t)valor_bruto;
 }
 
 static int fyd_ construir_huff(fyd_huff_t *ht) {
