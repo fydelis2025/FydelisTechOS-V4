@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import struct
 import sys
-import os
+
 
 FYD_EXEC_MAGIC = 0x31445946  # "FYD1"
 FYD_PKG_MAGIC  = 0x474B5046  # "FPKG"
