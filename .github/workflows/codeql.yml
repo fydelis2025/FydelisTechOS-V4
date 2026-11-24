@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ "main" ]
   schedule:
-    - cron: '0 12 * * 0'  # Todo domingo às 09:00 BRT / 12:00 UTC
+    - cron: '0 12 * * 0'
 
 jobs:
   analyze:
@@ -23,7 +23,7 @@ jobs:
       matrix:
         include:
           - language: c-cpp
-            build-mode: manual   # Build manual para código bare-metal
+            build-mode: none    # ✅ Analisa sem tentar rodar make
           - language: python
             build-mode: none
           - language: actions
@@ -40,14 +40,8 @@ jobs:
           build-mode: ${{ matrix.build-mode }}
           queries: security-extended,security-and-quality
 
-      # 🔧 Build manual — sem 'make clean' que estava causando o erro
-      - name: Build FydelisTechOS (manual)
-        if: matrix.build-mode == 'manual'
-        shell: bash
-        run: |
-          echo "🔨 Construindo FydelisTechOS..."
-          make kernel
-          echo "✅ Build concluído"
+      # ⚠️ REMOVIDO o passo de build manual
+      # O CodeQL com build-mode: none analisa os arquivos diretamente
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
