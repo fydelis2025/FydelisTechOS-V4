@@ -23,7 +23,7 @@ jobs:
       matrix:
         include:
           - language: c-cpp
-            build-mode: none    # ✅ Analisa sem tentar rodar make
+            build-mode: none
           - language: python
             build-mode: none
           - language: actions
@@ -31,19 +31,16 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
+        uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
           queries: security-extended,security-and-quality
 
-      # ⚠️ REMOVIDO o passo de build manual
-      # O CodeQL com build-mode: none analisa os arquivos diretamente
-
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
+        uses: github/codeql-action/analyze@v3
         with:
-          category: "/language:${{matrix.language}}"
+          category: "/language:${{ matrix.language }}"
