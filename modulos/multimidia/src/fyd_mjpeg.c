@@ -105,43 +105,43 @@ static void fyd_bits_reset_ac(fyd_bits_t *b) {
     b->bit_cnt = 0;
 }
 
-static int fyd_bits_preencher(fyd_bits_t *b, int min_bits) {
-    while (b->bit_cnt < min_bits) {
-        if (b->pos >= b->size) {
-            b->eof_stream = 1;
+static int fyd_bits_preencher(fyd_bits_t *bits, int min_bits) {
+    while (bits->bit_cnt < min_bits) {
+        if (bits->pos >= bits->size) {
+            bits->eof_stream = 1;
             /* Preenche zeros virtuais ao fim do buffer para nao travar */
-            b->bit_buf <<= (24 - b->bit_cnt);
-            b->bit_cnt = 24;
+            bits->bit_buf <<= (24 - bits->bit_cnt);
+            bits->bit_cnt = 24;
             return 1;
         }
-        uint8_t byte_val = b->data[b->pos++];
+        uint8_t byte_val = bits->data[bits->pos++];
         if (byte_val == 0xFF) {
-            if (b->pos >= b->size) {
-                b->eof_stream = 1;
+            if (bits->pos >= bits->size) {
+                bits->eof_stream = 1;
                 return 0;
             }
-            uint8_t prox = b->data[b->pos++];
-            if (prox == 0x00) {
+            uint8_t proximo_byte = bits->data[bits->pos++];
+            if (proximo_byte == 0x00) {
                 /* Byte stuffing valido: 0xFF real */
                 byte_val = 0xFF;
-            } else if (prox >= 0xD0 && prox <= 0xD7) {
+            } else if (proximo_byte >= 0xD0 && proximo_byte <= 0xD7) {
                 /* Marcador RST encontrado durante leitura */
-                b->pos -= 2;
-                b->eof_stream = 1;
-                b->bit_buf <<= (24 - b->bit_cnt);
-                b->bit_cnt = 24;
+                bits->pos -= 2;
+                bits->eof_stream = 1;
+                bits->bit_buf <<= (24 - bits->bit_cnt);
+                bits->bit_cnt = 24;
                 return 1;
             } else {
                 /* Outro marcador JPEG (ex.: EOI 0xD9) */
-                b->pos -= 2;
-                b->eof_stream = 1;
-                b->bit_buf <<= (24 - b->bit_cnt);
-                b->bit_cnt = 24;
+                bits->pos -= 2;
+                bits->eof_stream = 1;
+                bits->bit_buf <<= (24 - bits->bit_cnt);
+                bits->bit_cnt = 24;
                 return 1;
             }
         }
-        b->bit_buf = (b->bit_buf << 8) | (uint32_t)byte_val;
-        b->bit_cnt += 8;
+        bits->bit_buf = (bits->bit_buf << 8) | (uint32_t)byte_val;
+        bits->bit_cnt += 8;
     }
     return 1;
 }
