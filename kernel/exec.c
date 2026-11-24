@@ -2111,8 +2111,15 @@ static void eth_popup_on_key(char tecla) {
 
 // Bloco Wifi
 static void wifi_copiar_str(char *dst, const char *src, int max) {
-    int i = '\0';
-    while (src && src[i] && i < max - 1) {
+    int i = 0;
+    if (!dst || !src || max <= 0) {
+        if (dst && max > 0) {
+            dst[0] = '\0';
+        }
+        return;
+    }
+
+    while (i < max - 1 && src[i]) {
         dst[i] = src[i];
         i++;
     }
