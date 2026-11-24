@@ -2362,10 +2362,12 @@ static void desenhar_menu_iniciar_categorizado(int menu_x, int menu_y, int menu_
 - TELA 3: ÁREA DE TRABALHO GRÁFICA (Via Disco ATA e Drag sem Rastro)
 - ============================================================================ */
 static int exibir_desktop_grafico(int L, int A) {
+    /* Buffers locais de resolucao, formatacao temporaria e rotulo da sessao ativa */
     char res_buf[48];
     char tmp[16];
     char sessao_topo[36];
 
+    /* Le o fuso horario configurado no sistema (padrao UTC-3) */
     char tz_buf[8];
     int offset_fuso = -3;
     if (fyd_cfg_ler_chave(fs_ler_config_padrao(), "timezone", tz_buf, sizeof(tz_buf)) == 0) {
@@ -2376,6 +2378,7 @@ static int exibir_desktop_grafico(int L, int A) {
         }
     }
 
+    /* Calcula dimensoes e posicao central da janela principal do sistema */
     int win_w = (L * 64) / 100;
     if (win_w < 500) win_w = 500;
     int win_h = (A * 56) / 100;
@@ -2383,12 +2386,14 @@ static int exibir_desktop_grafico(int L, int A) {
     int win_x = (L - win_w) / 2;
     int win_y = (A - win_h) / 2 - 20;
 
+    /* Estado de visibilidade, modo e arraste da janela principal */
     int janela_aberta  = 1;
     int modo_janela    = MODO_JANELA_SISTEMA;
     int arrastando     = 0;
     int drag_offset_x  = 0;
     int drag_offset_y  = 0;
 
+    /* Estados de arraste das janelas modulares independentes */
     int arrastando_calc  = 0;
     int calc_drag_off_x  = 0;
     int calc_drag_off_y  = 0;
@@ -2409,6 +2414,7 @@ static int exibir_desktop_grafico(int L, int A) {
     int notes_drag_off_x = 0;
     int notes_drag_off_y = 0;
 
+    /* Geometria da barra de tarefas inferior e do botao Iniciar [F] */
     int taskbar_h      = 38;
     int taskbar_y      = A - taskbar_h;
     int btn_f_x        = 8;
@@ -2416,12 +2422,14 @@ static int exibir_desktop_grafico(int L, int A) {
     int btn_f_w        = 42;
     int btn_f_h        = 32;
 
+    /* Geometria e estado do menu iniciar categorizado */
     int menu_aberto    = 0;
     int menu_x         = 8;
     int menu_w         = 410;
     int menu_h         = 372;
     int menu_y         = taskbar_y - menu_h - 4;
 
+    /* Controle de redesenho, estado anterior do mouse e item sob o cursor */
     int precisa_redesenhar = 1;
     int btn_ant        = 0;
     int hover_ant      = -1;
@@ -2430,16 +2438,19 @@ static int exibir_desktop_grafico(int L, int A) {
     TelemetriaSistema telemetria;
     inicializar_telemetria(&telemetria, L, A);
 
+    /* Captura estado inicial de armazenamento, rede, bluetooth e audio */
     int disco_detectado = telemetria.disco_online;
     int link_rede_ativo = (rede_ler_status_link() != 0);
     int bt_estado       = (int)bt_ler_status();
     int audio_estado    = (int)audio_ler_status();
 
+    /* Registra inicializacao do desktop e alerta caso o disco ATA primario falhe */
     fydlog_escrever(LOG_INFO, "Desktop grafico iniciado");
     if (!disco_detectado) {
         fydlog_escrever(LOG_AVISO, "Disco ATA primario nao respondeu");
     }
 
+    /* Le relogio RTC e ajusta a hora para o fuso horario local configurado */
     RtcDataHora dt_atual;
     rtc_ler_agora(&dt_atual);
     int hora_local = ((int)dt_atual.hora + offset_fuso) % 24;
@@ -2450,6 +2461,7 @@ static int exibir_desktop_grafico(int L, int A) {
     uint64_t ticks_ant     = timer_ler_ticks();
     uint32_t ciclos_poll   = 0;
 
+    /* Monta string descritiva da resolucao de video VESA exibida no painel */
     str_copy(res_buf, "Video VESA    : ", sizeof(res_buf));
     num_para_str(L, tmp, sizeof(tmp));
     size_t pos = str_len(res_buf);
@@ -2470,12 +2482,15 @@ static int exibir_desktop_grafico(int L, int A) {
         str_copy(res_buf + pos, " @ 32-bit", sizeof(res_buf) - pos);
     }
 
+    /* Contadores de ciclos TSC para estimar utilizacao percentual da CPU */
     uint64_t tsc_anterior  = ler_tsc();
     uint64_t ciclos_ativos = 0;
 
+    /* Inicializa subsistema do cursor e entra no loop principal do desktop */
     ws_inicializar();
 
     while (1) {
+        /* Obtem coordenadas atuais do cursor e mascara de botoes do mouse */
         int mx, my, mb;
         obter_estado_mouse(&mx, &my, &mb);
 
@@ -2487,15 +2502,18 @@ static int exibir_desktop_grafico(int L, int A) {
             ticks_ant   = ticks_agora;
             ciclos_poll = 0;
 
+            /* Rele o horario atual e reaplica o deslocamento de fuso horario */
             rtc_ler_agora(&dt_atual);
             hora_local = ((int)dt_atual.hora + offset_fuso) % 24;
             if (hora_local < 0) hora_local += 24;
             dt_atual.hora = (uint8_t)hora_local;
 
+            /* Verifica mudancas nos estados de rede, bluetooth e audio */
             int novo_link  = (rede_ler_status_link() != 0);
             int novo_bt    = (int)bt_ler_status();
             int novo_audio = (int)audio_ler_status();
 
+            /* Calcula percentual aproximado de CPU a partir dos ciclos TSC ativos */
             uint64_t tsc_agora = ler_tsc();
             uint64_t delta_tsc = tsc_agora - tsc_anterior;
             tsc_anterior = tsc_agora;
@@ -2515,6 +2533,7 @@ static int exibir_desktop_grafico(int L, int A) {
             }
             ciclos_ativos = 0;
 
+            /* Redesenha apenas a area do systray quando hora ou periféricos mudarem */
             if (dt_atual.min != min_anterior || novo_link != link_rede_ativo ||
                 novo_bt != bt_estado || novo_audio != audio_estado) {
                 min_anterior    = dt_atual.min;
@@ -2542,11 +2561,13 @@ static int exibir_desktop_grafico(int L, int A) {
             hover_ant = -1;
         }
 
+        /* Redesenho completo do frame no backbuffer quando solicitado */
         if (precisa_redesenhar) {
             uint64_t t_frame_ini = ler_tsc();
             cursor_restaurar_fundo();
             backbuffer_iniciar_frame();
 
+            /* Obtem o rotulo formatado da sessao autenticada para o topo */
             fydperm_obter_rotulo_sessao(sessao_topo, sizeof(sessao_topo), "Sessao: ");
 
             /* 1. Wallpaper do Desktop carregado do Disco ATA */
@@ -2581,6 +2602,7 @@ static int exibir_desktop_grafico(int L, int A) {
 
                 desenhar_retangulo_solido(win_x + 2, win_y + 2, win_w - 4, 30, COR_PAINEL);
 
+                /* Seleciona icone e titulo conforme o modo ativo da janela principal */
                 const uint32_t *icone_win = icone_sistema;
                 const char *titulo_win    = "Painel do Sistema";
                 if (modo_janela == MODO_JANELA_APPS) {
@@ -2594,6 +2616,7 @@ static int exibir_desktop_grafico(int L, int A) {
                 gpu_desenhar_icone(icone_win, win_x + 10, win_y + 7, ICONE_TAM, ICONE_TAM);
                 gpu_escrever_texto(titulo_win, win_x + 36, win_y + 9, COR_TEXTO_BRANCO);
 
+                /* Botao de fechar [X] no canto superior direito da janela */
                 int close_x = win_x + win_w - 28;
                 int close_y = win_y + 6;
                 desenhar_retangulo_solido(close_x, close_y, 22, 22, COR_VERMELHO_ALERTA);
@@ -2602,6 +2625,7 @@ static int exibir_desktop_grafico(int L, int A) {
                 int cx = win_x + 22;
                 int cy = win_y + 46;
 
+                /* Conteudo interno da janela de acordo com o modo selecionado */
                 if (modo_janela == MODO_JANELA_SISTEMA) {
                     gpu_escrever_texto("Bem-vindo ao FydelisTechOS (64-bit Long Mode)!", cx, cy, COR_CIANO_NEON);
                     cy += 26;
@@ -2677,11 +2701,13 @@ static int exibir_desktop_grafico(int L, int A) {
             desenhar_retangulo_solido(0, taskbar_y, L, taskbar_h, COR_PAINEL);
             desenhar_retangulo_solido(0, taskbar_y, L, 2, COR_CIANO_NEON);
 
+            /* Botao [F] do Menu Iniciar */
             desenhar_caixa_com_borda(btn_f_x, btn_f_y, btn_f_w, btn_f_h, 1,
                 menu_aberto ? COR_CIANO_NEON : COR_ROXO_NEON,
                 menu_aberto ? COR_HOVER : COR_CARD);
             gpu_desenhar_icone(icone_fydelis_f, btn_f_x + 11, btn_f_y + 6, ICONE_TAM, ICONE_TAM);
 
+            /* Aba principal da janela do sistema na barra de tarefas */
             int tab_x = btn_f_x + btn_f_w + 10;
             desenhar_caixa_com_borda(tab_x, btn_f_y + 1, 195, 30, 1,
                 janela_aberta ? COR_CIANO_NEON : COR_BORDA_SUTIL,
@@ -2724,6 +2750,7 @@ static int exibir_desktop_grafico(int L, int A) {
                 prox_tab_x += 136;
             }
 
+            /* Bandeja do sistema (rede, disco, audio, relogio) e atalho para o terminal FydelTerm */
             desenhar_systray(L, taskbar_y, taskbar_h, link_rede_ativo, disco_detectado, bt_estado, audio_estado, &dt_atual, mx, my);
 
             int term_btn_w = 132;
@@ -2732,6 +2759,7 @@ static int exibir_desktop_grafico(int L, int A) {
             gpu_desenhar_icone(icone_terminal, term_btn_x + 8, btn_f_y + 6, ICONE_TAM, ICONE_TAM);
             gpu_escrever_texto("FydelTerm", term_btn_x + 34, btn_f_y + 8, COR_VERDE_NEON);
 
+            /* Sobreposicoes do menu iniciar e popups de rede */
             if (menu_aberto) {
                 desenhar_menu_iniciar_categorizado(menu_x, menu_y, menu_w, menu_h, mx, my);
             }
@@ -2739,6 +2767,7 @@ static int exibir_desktop_grafico(int L, int A) {
             wifi_popup_desenhar();
             eth_popup_desenhar();
 
+            /* Apresenta backbuffer na tela e acumula ciclos ativos do frame */
             backbuffer_apresentar_frame(L, A);
             cursor_desenhar_novo();
 
@@ -2746,6 +2775,7 @@ static int exibir_desktop_grafico(int L, int A) {
             precisa_redesenhar = 0;
         }
 
+        /* Atualiza posicao do cursor e detecta borda de subida do clique esquerdo */
         ws_atualizar_cursor();
 
         int botao_esq_pressionado = (mb & 0x01) != 0;
@@ -2769,6 +2799,7 @@ static int exibir_desktop_grafico(int L, int A) {
             }
         }
 
+        /* Movimentacao por arraste do painel de configuracoes estilo Win7 */
         if (g_painel_win7.aberta && g_painel_win7.arrastando) {
             if (botao_esq_pressionado) {
                 int nx = mx - g_painel_win7.drag_off_x;
@@ -2788,6 +2819,7 @@ static int exibir_desktop_grafico(int L, int A) {
             }
         }
 
+        /* Movimentacao por arraste da janela principal */
         if (arrastando) {
             if (botao_esq_pressionado) {
                 int novo_x = mx - drag_offset_x;
@@ -2809,6 +2841,7 @@ static int exibir_desktop_grafico(int L, int A) {
             }
         }
 
+        /* Movimentacao por arraste da calculadora */
         if (arrastando_calc) {
             if (botao_esq_pressionado) {
                 int nx = mx - calc_drag_off_x;
@@ -2830,6 +2863,7 @@ static int exibir_desktop_grafico(int L, int A) {
             }
         }
 
+        /* Movimentacao por arraste do visualizador de logs */
         if (arrastando_logs) {
             if (botao_esq_pressionado) {
                 int nx = mx - logs_drag_off_x;
@@ -2849,6 +2883,7 @@ static int exibir_desktop_grafico(int L, int A) {
             }
         }
 
+        /* Movimentacao por arraste do Explorer */
         if (arrastando_exp) {
             if (botao_esq_pressionado) {
                 int nx = mx - exp_drag_off_x;
@@ -2868,6 +2903,7 @@ static int exibir_desktop_grafico(int L, int A) {
             }
         }
 
+        /* Movimentacao por arraste do Browser */
         if (arrastando_brw) {
             if (botao_esq_pressionado) {
                 int nx = mx - brw_drag_off_x;
@@ -2887,6 +2923,7 @@ static int exibir_desktop_grafico(int L, int A) {
             }
         }
 
+        /* Movimentacao por arraste do Notes */
         if (arrastando_notes) {
             if (botao_esq_pressionado) {
                 int nx = mx - notes_drag_off_x;
@@ -2906,6 +2943,7 @@ static int exibir_desktop_grafico(int L, int A) {
             }
         }
 
+        /* Despacho de cliques nas janelas abertas, menu iniciar, barra de tarefas e atalhos */
         if (clique_agora) {
             int term_btn_w = 132;
             int term_btn_x = L - SYSTRAY_LARGURA - term_btn_w - 16;
@@ -2931,6 +2969,7 @@ static int exibir_desktop_grafico(int L, int A) {
                 precisa_redesenhar = 1;
             }
             else if (menu_aberto && ponto_no_retangulo(mx, my, menu_x, menu_y, menu_w, menu_h)) {
+                /* Trata botoes de sessao/energia no rodape e itens do menu categorizado */
                 int rod_y = menu_y + menu_h - 40;
                 int btn_w = (menu_w - 28) / 3;
                 int btn_y = rod_y + 6;
@@ -3103,6 +3142,7 @@ static int exibir_desktop_grafico(int L, int A) {
                 return 0;
             }
             else if (my >= taskbar_y) {
+                /* Alterna minimizar/restaurar para abas de aplicativos na barra de tarefas */
                 int prox_tab_x = (btn_f_x + btn_f_w + 10) + 203;
                 if (app_explorer.aberta) {
                     if (ponto_no_retangulo(mx, my, prox_tab_x, btn_f_y + 1, 130, 30)) {
@@ -3185,6 +3225,7 @@ static int exibir_desktop_grafico(int L, int A) {
             }
         }
 
+        /* Processa eventos de teclado PS/2 para popups, janelas ativas ou retorno ao CLI (ESC) */
         char tecla;
         while ((tecla = ler_tecla_ps2()) != 0) {
             if (eth_popup_aberto) {
@@ -3231,6 +3272,7 @@ static int exibir_desktop_grafico(int L, int A) {
             }
         }
 
+        /* Coloca a CPU em estado de espera (HLT) ate a proxima interrupcao */
         descansar_cpu_hlt();
     }
 }
