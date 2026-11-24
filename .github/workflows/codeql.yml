@@ -46,7 +46,7 @@ jobs:
         shell: bash
         run: |
           echo "🔨 Construindo FydelisTechOS..."
-          make all
+          make kernel
           echo "✅ Build concluído"
 
       - name: Perform CodeQL Analysis
