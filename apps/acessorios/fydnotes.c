@@ -79,7 +79,17 @@ static int ntc_len(const char *s) {
 
 static void ntc_cpy(char *dst, const char *src, int max) {
     int i = 0;
-    while (src[i] && i < max - 1) { dst[i] = src[i]; i++; }
+    if (!dst || !src || max <= 0) {
+        if (dst && max > 0) {
+            dst[0] = '\0';
+        }
+        return;
+    }
+
+    while (i < max - 1 && src[i]) {
+        dst[i] = src[i];
+        i++;
+    }
     dst[i] = '\0';
 }
 
