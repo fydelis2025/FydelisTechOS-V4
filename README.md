@@ -9,16 +9,18 @@
 
 </div>
 
-<p align="center">
-  <img src="https://github.com/fydelis2025/FydelisTechOS-V2/blob/main/assets/images/logo_menu.png" alt="FydelisTechOS Dashboard" width="40%">
-</p>
-
 [![CodeQL - FydelisTechOS](https://github.com/fydelis2025/FydelisTechOS-V4/actions/workflows/codeql.yml/badge.svg)](https://github.com/fydelis2025/FydelisTechOS-V4/actions/workflows/codeql.yml)
 [![OpenSSF Scorecard Workflow](https://github.com/fydelis2025/FydelisTechOS-V4/actions/workflows/scorecard.yml/badge.svg)](https://github.com/fydelis2025/FydelisTechOS-V4/actions/workflows/scorecard.yml)
 ![GitHub last commit](https://img.shields.io/github/last-commit/fydelis2025/FydelisTechOS-V4?style=flat-square)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/fydelis2025/FydelisTechOS-V4?style=flat-square)
 ![Arch](https://img.shields.io/badge/ARCH-x86__64-blueviolet?style=flat-square)
 <!--[![OpenSSF Scorecard](https://img.shields.io/badge/OpenSSF%20Scorecard-X.X%2F10-blue)](https://github.com/fydelis2025/FydelisTechOS-V4/actions/workflows/scorecard.yml)!-->
+
+<p align="center">
+  <img src="https://github.com/fydelis2025/FydelisTechOS-V2/blob/main/assets/images/logo_menu.png" alt="FydelisTechOS Dashboard" width="40%">
+</p>
+
+
 
 
 Bem-vindo ao centro oficial de documentação do **FydelisTechOS — V2**. Aqui você encontra a visão completa do projeto: sua história, arquitetura, estado atual e os caminhos percorridos até chegar onde estamos.
