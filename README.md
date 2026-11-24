@@ -31,6 +31,12 @@ Bem-vindo ao centro oficial de documentação do **FydelisTechOS — V4.2**. Aqu
 
 ---
 
+## 🛡️ Segurança e Auditoria
+
+O **FydelisTechOS-V4.2** passa por análise estática contínua via **CodeQL** e auditoria de cadeia de suprimentos via **OpenSSF Scorecard**, mantendo zero alertas abertos na branch principal.
+
+* 📄 **Artigo Técnico:** [Boas Práticas de Segurança no Desenvolvimento do FydelisTechOS V4.2 (DIO)](https://web.dio.me/articles/boas-praticas-de-seguranca-no-desenvolvimento-do-fydelistechos-v42-a4d47d84d31d)
+
 ## 📑 Índice Geral
 
 ### 📖 História e Evolução
