@@ -108,10 +108,31 @@ static int exp_contem(const char *texto, const char *sub) {
 
 static void exp_juntar(char *dst, int max, const char *base, const char *nome) {
     int i = 0;
-    while (base[i] && i < max - 2) { dst[i] = base[i]; i++; }
-    if (i > 0 && dst[i - 1] != '/' && i < max - 2) dst[i++] = '/';
     int j = 0;
-    while (nome[j] && i < max - 1) dst[i++] = nome[j++];
+
+    if (!dst || !base || !nome || max <= 0) {
+        if (dst && max > 0) {
+            dst[0] = '\0';
+        }
+        return;
+    }
+
+    while (i < max - 2 && base[i]) {
+        dst[i] = base[i];
+        i++;
+    }
+
+    if (i > 0 && i < max - 2 && dst[i - 1] != '/') {
+        dst[i] = '/';
+        i++;
+    }
+
+    while (i < max - 1 && nome[j]) {
+        dst[i] = nome[j];
+        i++;
+        j++;
+    }
+
     dst[i] = '\0';
 }
 
