@@ -44,5 +44,4 @@ jobs:
           scorecard \
             --repo="${{ github.repository }}" \
             --show-details \
-            --format=json \
-            --output=results.json
+            --format=default
