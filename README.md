@@ -16,7 +16,7 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/fydelis2025/FydelisTechOS-V4?style=flat-square)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/fydelis2025/FydelisTechOS-V4?style=flat-square)
 ![Arch](https://img.shields.io/badge/ARCH-x86__64-blueviolet?style=flat-square)
-[![OpenSSF Scorecard](https://img.shields.io/badge/OpenSSF%20Scorecard-4.2%2F10-yellow)](https://github.com/fydelis2025/FydelisTechOS-V4/actions/workflows/scorecard.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/fydelis2025/FydelisTechOS-V4/badge)](https://scorecard.dev/viewer/?uri=github.com/fydelis2025/FydelisTechOS-V4)
 
 </div>
 
