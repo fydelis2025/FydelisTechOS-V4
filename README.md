@@ -27,7 +27,7 @@
 
 
 
-Bem-vindo ao centro oficial de documentação do **FydelisTechOS — V2**. Aqui você encontra a visão completa do projeto: sua história, arquitetura, estado atual e os caminhos percorridos até chegar onde estamos.
+Bem-vindo ao centro oficial de documentação do **FydelisTechOS — V4.2**. Aqui você encontra a visão completa do projeto: sua história, arquitetura, estado atual e os caminhos percorridos até chegar onde estamos.
 
 ---
 
