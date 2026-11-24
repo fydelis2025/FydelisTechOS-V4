@@ -16,6 +16,7 @@
 [![CodeQL - FydelisTechOS](https://github.com/fydelis2025/FydelisTechOS-V4/actions/workflows/codeql.yml/badge.svg)](https://github.com/fydelis2025/FydelisTechOS-V4/actions/workflows/codeql.yml)
 [![OpenSSF Scorecard Workflow](https://github.com/fydelis2025/FydelisTechOS-V4/actions/workflows/scorecard.yml/badge.svg)](https://github.com/fydelis2025/FydelisTechOS-V4/actions/workflows/scorecard.yml)
 ![GitHub last commit](https://img.shields.io/github/last-commit/fydelis2025/FydelisTechOS-V4?style=flat-square)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/fydelis2025/FydelisTechOS-V4?style=flat-square)
 <!--[![OpenSSF Scorecard](https://img.shields.io/badge/OpenSSF%20Scorecard-X.X%2F10-blue)](https://github.com/fydelis2025/FydelisTechOS-V4/actions/workflows/scorecard.yml)!-->
 
 
