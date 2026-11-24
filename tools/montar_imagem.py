@@ -65,18 +65,20 @@ def montar_imagem(
     img_data[off_kernel:end_kernel] = kernel_data
 
     # 3. Grava binário EFI na área LBA 8192 (útil para testes diretos de setor/imagem)
+    efi_data: bytes | None = None
     if efi_bin and efi_bin.exists():
-        efi_data = efi_bin.read_bytes()
+        dados_efi = efi_bin.read_bytes()
         off_efi = LBA_EFI * SECTOR_SIZE
-        end_efi = off_efi + len(efi_data)
+        end_efi = off_efi + len(dados_efi)
         if end_efi <= len(img_data):
-            img_data[off_efi:end_efi] = efi_data
+            img_data[off_efi:end_efi] = dados_efi
+            efi_data = dados_efi
 
     out_img.write_bytes(img_data)
     print(f"[OK] Imagem gerada: {out_img} ({len(img_data)} bytes)")
     print(f"     LBA 0    : MBR signature 0x{img_data[510]:02X}{img_data[511]:02X}")
     print(f"     LBA {LBA_KERNEL}: kernel.bin ({len(kernel_data)} bytes)")
-    if efi_bin and efi_bin.exists():
+    if efi_bin is not None and efi_data is not None:
         print(f"     LBA {LBA_EFI}: {efi_bin.name} ({len(efi_data)} bytes)")
 
 
