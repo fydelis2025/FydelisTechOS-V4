@@ -36,10 +36,5 @@ jobs:
           scorecard \
             --repo="${{ github.repository }}" \
             --show-details \
-            --format=sarif \
-            --output=results.sarif
-
-      - name: Upload SARIF results
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: results.sarif
+            --format=json \
+            --output=results.json
