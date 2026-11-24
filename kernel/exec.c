@@ -1446,20 +1446,23 @@ static void fydperm_obter_rotulo_sessao(char *dst, size_t tam, const char *prefi
 - TELA 2: LOGIN GRÁFICO INTERATIVO (Via Disco ATA, Cursor Limpo e Tab/Backspace)
 - ============================================================================ */
 static void exibir_tela_login(int L, int A) {
+    /* Buffers locais de credenciais, mascara visual e controle de estado da UI */
     char usuario[24];
     char senha[24];
     char mascara[24];
-    int campo_ativo = 0;        /* Começa no campo USUARIO */
+    int campo_ativo = 0;        /* 0 = campo USUARIO, 1 = campo SENHA */
     int erro_login  = 0;
     int precisa_redesenhar = 1;
     int btn_ant = 0;
 
+    /* Limpa buffers sensiveis e garante a existencia do usuario administrador padrao */
     fyd_zerar_memoria(usuario, sizeof(usuario));
     fyd_zerar_memoria(senha, sizeof(senha));
     fyd_zerar_memoria(mascara, sizeof(mascara));
 
     auth_garantir_adm_padrao();
 
+    /* Calcula geometria responsiva do cartao central e dos campos de entrada */
     int card_w = (L * 42) / 100;
     if (card_w < 340) card_w = 340;
     if (card_w > 460) card_w = 460;
@@ -1478,6 +1481,7 @@ static void exibir_tela_login(int L, int A) {
 
     while (1) {
         if (precisa_redesenhar) {
+            /* Restaura cursor, inicia backbuffer e desenha fundo, barra superior e cartao */
             cursor_restaurar_fundo();
             backbuffer_iniciar_frame();
 
@@ -1491,6 +1495,7 @@ static void exibir_tela_login(int L, int A) {
             escrever_texto_centralizado("AUTENTICACAO DO SISTEMA", card_x + (card_w / 2), card_y + 24, COR_CIANO_NEON);
             escrever_texto_centralizado("Entre com suas credenciais", card_x + (card_w / 2), card_y + 46, COR_TEXTO_SUAVE);
 
+            /* Campo de usuario e indicador de cursor no campo ativo */
             gpu_escrever_texto("USUARIO:", input_x, user_y - 18, COR_ROXO_CLARO);
             desenhar_caixa_com_borda(input_x, user_y, input_w, input_h, 2,
                 (campo_ativo == 0) ? COR_CIANO_NEON : COR_BORDA_SUTIL, COR_INPUT_BG);
@@ -1499,6 +1504,7 @@ static void exibir_tela_login(int L, int A) {
                 gpu_escrever_texto("_", input_x + 10 + (int)str_len(usuario) * 8, user_y + 8, COR_CIANO_NEON);
             }
 
+            /* Campo de senha mascarado com '*' para nao expor caracteres na tela */
             gpu_escrever_texto("SENHA:", input_x, pass_y - 18, COR_ROXO_CLARO);
             desenhar_caixa_com_borda(input_x, pass_y, input_w, input_h, 2,
                 (campo_ativo == 1) ? COR_CIANO_NEON : COR_BORDA_SUTIL, COR_INPUT_BG);
@@ -1510,6 +1516,7 @@ static void exibir_tela_login(int L, int A) {
                 gpu_escrever_texto("_", input_x + 10 + (int)slen * 8, pass_y + 8, COR_CIANO_NEON);
             }
 
+            /* Botao de submissao e mensagem de status/erro de autenticacao */
             desenhar_retangulo_solido(input_x, btn_y, input_w, 36, COR_ROXO_NEON);
             escrever_texto_centralizado("[ ENTER / CLIQUE ] ENTRAR", card_x + (card_w / 2), btn_y + 10, COR_TEXTO_BRANCO);
 
@@ -1519,6 +1526,7 @@ static void exibir_tela_login(int L, int A) {
                 escrever_texto_centralizado("[TAB / SETAS] Alternar  |  [ENTER] Acessar", card_x + (card_w / 2), card_y + 262, COR_TEXTO_SUAVE);
             }
 
+            /* Apresenta o frame completo e reposiciona o cursor do mouse */
             backbuffer_apresentar_frame(L, A);
             cursor_desenhar_novo();
             precisa_redesenhar = 0;
@@ -1526,6 +1534,7 @@ static void exibir_tela_login(int L, int A) {
 
         ws_atualizar_cursor();
 
+        /* Le estado do mouse e detecta borda de subida do clique esquerdo */
         int mx, my, mb;
         obter_estado_mouse(&mx, &my, &mb);
         int clique_esq = (mb & 0x01) && !(btn_ant & 0x01);
@@ -1544,6 +1553,7 @@ static void exibir_tela_login(int L, int A) {
             }
         }
 
+        /* Processa entrada PS/2 (Tab, Enter, Backspace e caracteres imprimiveis) */
         char tecla;
         while ((tecla = ler_tecla_ps2()) != 0) {
             if (tecla == '\t') {
@@ -1570,6 +1580,7 @@ static void exibir_tela_login(int L, int A) {
             }
         }
 
+        /* Valida credenciais, zera dados sensiveis em memoria e sai em caso de sucesso */
         if (submeter_login) {
             if (auth_login(usuario, senha) == 0) {
                 fyd_zerar_memoria(senha, sizeof(senha));
