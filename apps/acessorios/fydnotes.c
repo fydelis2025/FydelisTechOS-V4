@@ -400,13 +400,17 @@ int notepad_esta_minimizado(void) {
     return (app_notepad.aberta && ntc_win_estado == NTC_WIN_MINIMIZADA);
 }
 
+/* Renderiza a janela completa do FydelNotes: barra, toolbar, abas, editor e status */
 static void notes_desenhar(void) {
+    /* Nao desenha se o aplicativo estiver fechado ou minimizado */
     if (!app_notepad.aberta) return;
     if (ntc_win_estado == NTC_WIN_MINIMIZADA) return;
 
+    /* Obtem geometria atual da janela */
     int x, y, w, h;
     ntc_geom(&x, &y, &w, &h);
 
+    /* Moldura externa e barra superior com controles da janela */
     gui_retangulo(x, y, w, h, NTC_PAINEL);
     gui_borda(x, y, w, h, NTC_ROXO);
 
@@ -421,12 +425,14 @@ static void notes_desenhar(void) {
         ntc_btn(NTC_BTN_MAX(x, w), y + 4, 20, 20, NTC_ITEM_SEL, NTC_VERDE, "+", 6, 2, NTC_VERDE);
     ntc_btn(NTC_BTN_MIN(x, w), y + 4, 20, 20, NTC_ITEM_SEL, NTC_SUAVE, "_", 6, 6, NTC_SUAVE);
 
+    /* Barra de ferramentas (Novo, Abrir, Salvar) e mensagem de status temporaria */
     int tb_y = y + 34;
     ntc_btn(x + 10,  tb_y, 50, 24, NTC_ITEM_SEL, NTC_ROXO, "Novo",   8, 4, 0xFFFFFFFF);
     ntc_btn(x + 66,  tb_y, 54, 24, NTC_ITEM_SEL, NTC_ROXO, "Abrir",  8, 4, 0xFFFFFFFF);
     ntc_btn(x + 126, tb_y, 58, 24, NTC_ITEM_SEL, NTC_ROXO, "Salvar", 8, 4, 0xFFFFFFFF);
     gui_texto(x + 194, tb_y + 4, ntc_mensagem, NTC_VERDE);
 
+    /* Faixa de abas abertas indicando documento ativo e modificacoes nao salvas */
     int aba_y = tb_y + 28;
     int aba_w = 104;
     for (int i = 0; i < ntc_aba_count; i++) {
@@ -444,6 +450,7 @@ static void notes_desenhar(void) {
         if (a->modificado) gui_texto(ax + aba_w - 12, aba_y + 4, "*", NTC_AMARELO);
     }
 
+    /* Area principal de edicao com margem esquerda (gutter) de numeros de linha */
     int edit_x = x + 10;
     int edit_y = aba_y + 26;
     int edit_w = w - 20;
@@ -458,6 +465,7 @@ static void notes_desenhar(void) {
     int gutter_w = 44;
     gui_retangulo(edit_x + 1, edit_y + 1, gutter_w, edit_h - 2, NTC_NUM_LINHA);
 
+    /* Sincroniza rolagem horizontal/vertical com a area visivel do editor */
     int linhas_visiveis = (edit_h - 10) / NTC_LH;
     int cols_visiveis   = (edit_w - gutter_w - 20) / NTC_CW;
 
@@ -466,6 +474,7 @@ static void notes_desenhar(void) {
     int texto_x = edit_x + gutter_w + 8;
     int ty = edit_y + 6;
 
+    /* Renderiza linhas visiveis, destaque da linha atual, texto e cursor */
     for (int vis = 0; vis < linhas_visiveis; vis++) {
         int linha = ntc_scroll_v + vis;
         int total = ntc_total_linhas(a->buf, a->len);
@@ -477,6 +486,7 @@ static void notes_desenhar(void) {
         if (linha == ntc_cursor_lin)
             gui_retangulo(edit_x + gutter_w + 2, ty - 2, edit_w - gutter_w - 4, NTC_LH, NTC_LINHA_CUR);
 
+        /* Formata numero da linha alinhado a direita no gutter */
         char num[8];
         int ni = 0, v = linha + 1;
         char inv[8];
@@ -487,6 +497,7 @@ static void notes_desenhar(void) {
         gui_texto(edit_x + gutter_w - 6 - (ni * NTC_CW), ty, num,
                   linha == ntc_cursor_lin ? NTC_AMARELO : NTC_CIANO);
 
+        /* Copia fatia visivel da linha substituindo tabulacoes por espaco */
         char linha_buf[160];
         int limite = comp - ntc_scroll_h;
         if (limite > 159) limite = 159;
@@ -497,6 +508,7 @@ static void notes_desenhar(void) {
         linha_buf[limite > 0 ? limite : 0] = '\0';
         if (limite > 0) gui_texto(texto_x, ty, linha_buf, NTC_TEXTO);
 
+        /* Desenha marcador do cursor na coluna ativa */
         if (linha == ntc_cursor_lin) {
             int cx = texto_x + (ntc_cursor_col - ntc_scroll_h) * NTC_CW;
             if (cx >= texto_x && cx < edit_x + edit_w - 4)
@@ -506,6 +518,7 @@ static void notes_desenhar(void) {
         ty += NTC_LH;
     }
 
+    /* Barra de rolagem vertical proporcional quando houver mais linhas que a tela */
     int total_lin = ntc_total_linhas(a->buf, a->len);
     if (total_lin > linhas_visiveis) {
         int sb_x = edit_x + edit_w - 8;
@@ -517,6 +530,7 @@ static void notes_desenhar(void) {
         gui_retangulo(sb_x, edit_y + 2 + off, 6, prop, NTC_ROXO);
     }
 
+    /* Barra de status inferior com linha, coluna, tamanho em bytes e caminho do arquivo */
     gui_retangulo(x + 2, y + h - 20, w - 4, 18, NTC_TOPO);
     char st[112];
     int si = 0;
