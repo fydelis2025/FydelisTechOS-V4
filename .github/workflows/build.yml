@@ -13,10 +13,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Baixar codigo-fonte
-        uses: actions/checkout@v11bd4976a0d0b59f65361d134d2a617d49020d8c # v4.2.2 ✅
+        uses: actions/checkout@11bd4976a0d0b59f65361d134d2a617d49020d8c # v4.2.2
 
       - name: Verificar estrutura de pastas e includes
         run: |
@@ -86,7 +88,7 @@ jobs:
           ls -lh "$IMG"
 
       - name: Publicar artefatos (fydelterm.img, fydelterm.iso e kernel.bin)
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb48e1 # v4.4.3 ✅
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb48e1 # v4.4.3
         with:
           name: FydelisTechOS-build
           path: |
@@ -96,7 +98,7 @@ jobs:
 
       - name: Criar Release Publica (ao enviar tag v*)
         if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@c062cb1748a419b626385294c91a56061f7e7e49 # v2.0.9 ✅
+        uses: softprops/action-gh-release@c062cb1748a419b626385294c91a56061f7e7e49 # v2.0.9
         with:
           files: |
             kernel/fydelterm.img
