@@ -12,7 +12,14 @@ static int cfg_strcmp(const char *s1, const char *s2) {
 // Função auxiliar para copiar string limitando o tamanho
 static void cfg_strncpy(char *dest, const char *src, int max_len) {
     int i = 0;
-    while (src[i] && i < max_len - 1) {
+    if (!dest || !src || max_len <= 0) {
+        if (dest && max_len > 0) {
+            dest[0] = '\0';
+        }
+        return;
+    }
+
+    while (i < max_len - 1 && src[i]) {
         dest[i] = src[i];
         i++;
     }
