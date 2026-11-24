@@ -559,12 +559,16 @@ static void notes_desenhar(void) {
     gui_texto(x + 12, y + h - 18, st, NTC_VERDE);
 }
 
+/* Trata cliques relativos dentro da janela do FydelNotes (barra, toolbar, abas e texto) */
 static void notes_on_click(int rel_x, int rel_y) {
+    /* Ignora cliques enquanto a janela estiver minimizada */
     if (ntc_win_estado == NTC_WIN_MINIMIZADA) return;
 
+    /* Obtem geometria atual da janela para calcular coordenadas relativas */
     int x, y, w, h;
     ntc_geom(&x, &y, &w, &h);
 
+    /* Botoes da barra de titulo: fechar, maximizar/restaurar e minimizar */
     if (rel_y >= 2 && rel_y <= 28) {
         if (rel_x >= NTC_BTN_FECHAR(x, w) - x && rel_x <= NTC_BTN_FECHAR(x, w) - x + 20) {
             app_notepad.aberta = 0;
@@ -573,12 +577,14 @@ static void notes_on_click(int rel_x, int rel_y) {
         }
         if (rel_x >= NTC_BTN_MAX(x, w) - x && rel_x <= NTC_BTN_MAX(x, w) - x + 20) {
             if (ntc_win_estado == NTC_WIN_MAXIMIZADA) {
+                /* Restaura geometria salva antes da maximizacao */
                 app_notepad.x = ntc_salvo_x;
                 app_notepad.y = ntc_salvo_y;
                 app_notepad.w = ntc_salvo_w;
                 app_notepad.h = ntc_salvo_h;
                 ntc_win_estado = NTC_WIN_NORMAL;
             } else {
+                /* Salva geometria atual e expande a janela na area util da tela */
                 ntc_salvo_x = app_notepad.x;
                 ntc_salvo_y = app_notepad.y;
                 ntc_salvo_w = app_notepad.w;
@@ -602,6 +608,7 @@ static void notes_on_click(int rel_x, int rel_y) {
     int aba_y = tb_y + 28;
     int aba_w = 104;
 
+    /* Botoes da barra de ferramentas: nova aba, abrir configuracao padrao e salvar */
     if (rel_y >= tb_y && rel_y <= tb_y + 24) {
         if (rel_x >= 10 && rel_x <= 60) {
             char nome[16] = "nota";
@@ -631,6 +638,7 @@ static void notes_on_click(int rel_x, int rel_y) {
         return;
     }
 
+    /* Seleciona aba ativa e reseta cursor e rolagem para o inicio do documento */
     if (rel_y >= aba_y && rel_y <= aba_y + 22) {
         int idx = (rel_x - 10) / (aba_w + 4);
         if (idx >= 0 && idx < ntc_aba_count) {
@@ -643,6 +651,7 @@ static void notes_on_click(int rel_x, int rel_y) {
         return;
     }
 
+    /* Posiciona o cursor de texto ao clicar dentro da area de edicao e ajusta rolagem */
     int edit_y = aba_y + 26;
     int edit_w = w - 20;
     int edit_h = h - edit_y - 24;
@@ -653,12 +662,14 @@ static void notes_on_click(int rel_x, int rel_y) {
         int linhas_visiveis = (edit_h - 10) / NTC_LH;
         int cols_visiveis   = (edit_w - 52 - 20) / NTC_CW;
 
+        /* Calcula linha alvo limitada ao intervalo valido do buffer */
         int nova_lin = ntc_scroll_v + (rel_y - edit_y - 6) / NTC_LH;
         int total = ntc_total_linhas(a->buf, a->len);
         if (nova_lin >= total) nova_lin = total - 1;
         if (nova_lin < 0) nova_lin = 0;
         ntc_cursor_lin = nova_lin;
 
+        /* Calcula coluna alvo limitada ao comprimento da linha selecionada */
         int off_lin = ntc_offset_linha(a->buf, a->len, ntc_cursor_lin);
         int comp = ntc_comp_linha(a->buf, a->len, off_lin);
         int nova_col = ntc_scroll_h + (rel_x - 54) / NTC_CW;
