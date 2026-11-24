@@ -1,6 +1,5 @@
 name: Build FydelisTech OS
 
-# ✅ Adicionado permissões (resolve o alerta do CodeQL #1)
 permissions:
   contents: read
 
@@ -17,7 +16,7 @@ jobs:
 
     steps:
       - name: Baixar codigo-fonte
-        uses: actions/checkout@61b9e3751b3e34f4b2d7e8f9a0c1b2d3e4f5a6b7  # ✅ Hash imutável (resolve alerta #2)
+        uses: actions/checkout@v11bd4976a0d0b59f65361d134d2a617d49020d8c # v4.2.2 ✅
 
       - name: Verificar estrutura de pastas e includes
         run: |
@@ -41,7 +40,6 @@ jobs:
           IMG="kernel/fydelterm.img"
           KERNEL_BIN="kernel/kernel.bin"
 
-          # Localiza BOOTX64.EFI ja assinado ou compila boot/boot_uefi.asm
           EFI_BIN=$(find . -maxdepth 4 -name "BOOTX64.EFI" | head -n 1)
           if [ -z "$EFI_BIN" ] && [ -f "boot/boot_uefi.asm" ]; then
             nasm -f bin boot/boot_uefi.asm -o boot/BOOTX64.EFI
@@ -53,20 +51,15 @@ jobs:
             fi
           fi
 
-          # Localiza mbr.bin (Legacy BIOS) se existir
           MBR_BIN=$(find . -maxdepth 3 -name "mbr.bin" | head -n 1)
 
-          # 1. Cria disco bruto de 64 MB (131072 setores de 512 bytes)
           dd if=/dev/zero of="$IMG" bs=1M count=64 status=none
 
-          # 2. Cria tabela GPT com particao EFI (EF00) iniciando no LBA 8192
           sgdisk -o "$IMG" >/dev/null
           sgdisk -n 1:8192:131000 -t 1:EF00 -c 1:"FYDELIS_ESP" "$IMG" >/dev/null
 
-          # 3. Grava kernel.bin no LBA 4096 (offset 2097152 bytes)
           dd if="$KERNEL_BIN" of="$IMG" bs=512 seek=4096 conv=notrunc status=none
 
-          # 4. Monta particao FAT32 (ESP) com BOOTX64.EFI e certificados .cer
           ESP_SECTORS=$((131000 - 8192 + 1))
           dd if=/dev/zero of=esp.part bs=512 count=$ESP_SECTORS status=none
           mkfs.fat -F 32 -n "FYDELISOS" esp.part >/dev/null
@@ -85,17 +78,15 @@ jobs:
           dd if=esp.part of="$IMG" bs=512 seek=8192 conv=notrunc status=none
           rm -f esp.part
 
-          # 5. Injeta codigo Legacy BIOS MBR nos primeiros 440 bytes sem tocar na tabela GPT
           if [ -n "$MBR_BIN" ] && [ -f "$MBR_BIN" ]; then
             dd if="$MBR_BIN" of="$IMG" bs=440 count=1 conv=notrunc status=none
           fi
 
-          # 6. Sincroniza backup GPT no final da imagem
           sgdisk -e "$IMG" >/dev/null
           ls -lh "$IMG"
 
       - name: Publicar artefatos (fydelterm.img, fydelterm.iso e kernel.bin)
-        uses: actions/upload-artifact@834a144ee9954dba8787340834de37c68d39e56a  # ✅ Hash imutável
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb48e1 # v4.4.3 ✅
         with:
           name: FydelisTechOS-build
           path: |
@@ -105,7 +96,7 @@ jobs:
 
       - name: Criar Release Publica (ao enviar tag v*)
         if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@c062cb1748a419b626385294c91a56061f7e7e49  # ✅ Hash imutável
+        uses: softprops/action-gh-release@c062cb1748a419b626385294c91a56061f7e7e49 # v2.0.9 ✅
         with:
           files: |
             kernel/fydelterm.img
