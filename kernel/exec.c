@@ -458,12 +458,13 @@ static int __attribute__((unused)) str_eq(const char *a, const char *b) {
 
 static void str_copy(char *dst, const char *src, size_t max_len) {
     size_t i = 0;
-    if (max_len == 0) return;
-    while (src[i] && i < max_len - 1) {
+    if (!dst || !src || max_len == 0) return;
+
+    while (i < max_len - 1 && src[i]) {
         dst[i] = src[i];
         i++;
     }
-    dst[i] = 0;
+    dst[i] = '\0';
 }
 
 static void num_para_str(int valor, char *buf, size_t tam) {
