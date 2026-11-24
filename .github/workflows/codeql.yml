@@ -1,0 +1,56 @@
+name: "CodeQL - FydelisTechOS"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '0 12 * * 0'  # Todo domingo às 09:00 BRT / 12:00 UTC
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: c-cpp
+            build-mode: manual   # ⚠️ O mais importante! Sem build padrão
+          - language: python
+            build-mode: none
+          - language: actions
+            build-mode: none
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          queries: security-extended,security-and-quality
+
+      # 🔧 PASSO DE BUILD MANUAL — essencial para código bare-metal
+      - name: Build FydelisTechOS (manual)
+        if: matrix.build-mode == 'manual'
+        shell: bash
+        run: |
+          echo "🔨 Construindo FydelisTechOS..."
+          make clean
+          make all
+          echo "✅ Build concluído"
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:${{matrix.language}}"
