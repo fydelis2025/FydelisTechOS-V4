@@ -68,7 +68,17 @@ static int  exp_hist_count = 0;
 /* ---------- Utilidades ---------- */
 static void exp_str_cpy(char *dst, const char *src, int max) {
     int i = 0;
-    while (src[i] && i < max - 1) { dst[i] = src[i]; i++; }
+    if (!dst || !src || max <= 0) {
+        if (dst && max > 0) {
+            dst[0] = '\0';
+        }
+        return;
+    }
+
+    while (i < max - 1 && src[i]) {
+        dst[i] = src[i];
+        i++;
+    }
     dst[i] = '\0';
 }
 
