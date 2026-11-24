@@ -380,7 +380,8 @@ static void exp_desenhar_arvore(int tree_x, int tree_y, int tree_w, int tree_h) 
     exp_str_cpy(acumulado, exp_arvore_raiz, EXP_CAMINHO_MAX);
 
     int linhas = 0;
-    if (linhas < max_linhas) {
+    /* max_linhas já foi validado como > 0 e linhas começa em 0 */
+    {
         int sel = exp_str_eq(acumulado, exp_caminho);
         if (sel) {
             gui_retangulo(tree_x + 4, cy - 2, tree_w - 8, 18, EXP_COR_ITEM_SEL);
@@ -388,13 +389,17 @@ static void exp_desenhar_arvore(int tree_x, int tree_y, int tree_w, int tree_h) 
         }
         gpu_desenhar_icone(icone_pasta_aberta, tree_x + 8, cy, 14, 14);
         gui_texto(tree_x + 26, cy + 1, acumulado, sel ? EXP_COR_CIANO : EXP_COR_TEXTO);
-        cy += 20; linhas++;
+        cy += 20;
+        linhas++;
     }
 
     for (int s = 0; s < n_seg && linhas < max_linhas; s++) {
         int l = exp_str_len(acumulado);
-        acumulado[l] = '/'; acumulado[l + 1] = '\0';
-        exp_str_cpy(acumulado + l + 1, segmentos[s], EXP_CAMINHO_MAX - l - 1);
+        if (l < EXP_CAMINHO_MAX - 1) {
+            acumulado[l] = '/';
+            acumulado[l + 1] = '\0';
+            exp_str_cpy(acumulado + l + 1, segmentos[s], EXP_CAMINHO_MAX - l - 1);
+        }
 
         int nivel = s + 1;
         int indent = nivel * 14;
@@ -408,7 +413,8 @@ static void exp_desenhar_arvore(int tree_x, int tree_y, int tree_w, int tree_h) 
         gpu_desenhar_icone(icone_pasta_aberta, tree_x + 8 + indent, cy, 14, 14);
         gui_texto(tree_x + 26 + indent, cy + 1, segmentos[s],
                   sel ? EXP_COR_CIANO : EXP_COR_TEXTO);
-        cy += 20; linhas++;
+        cy += 20;
+        linhas++;
     }
 
     int restam = max_linhas - linhas;
@@ -419,7 +425,8 @@ static void exp_desenhar_arvore(int tree_x, int tree_y, int tree_w, int tree_h) 
         gui_texto(tree_x + 6 + indent - 12, cy + 1, "|-", EXP_COR_SUAVE);
         gpu_desenhar_icone(icone_pasta_fechada, tree_x + 8 + indent, cy, 14, 14);
         gui_texto(tree_x + 26 + indent, cy + 1, exp_lista[i].nome, EXP_COR_VERDE);
-        cy += 20; desenhadas++;
+        cy += 20;
+        desenhadas++;
     }
 }
 
