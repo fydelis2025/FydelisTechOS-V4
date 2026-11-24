@@ -3,7 +3,6 @@ name: OpenSSF Scorecard
 on:
   schedule:
     - cron: '0 6 * * 1' # Toda segunda-feira às 06:00 UTC
-  branch_protection_rule:
   push:
     branches: [ main ]
   workflow_dispatch:
@@ -23,13 +22,21 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Install OpenSSF Scorecard CLI
+        run: |
+          set -euo pipefail
+          curl -sSfL https://raw.githubusercontent.com/ossf/scorecard/main/install.sh | bash -s -- -b /usr/local/bin
+
       - name: Run OpenSSF Scorecard
-        uses: ossf/scorecard-action@e11b7220b1c41fb3294146c361cec8f97bf2fb50 # v2.6.0
-        with:
-          results_file: results.sarif
-          results_format: sarif
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_results: true
+        env:
+          GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          scorecard \
+            --repo="${{ github.repository }}" \
+            --show-details \
+            --format=sarif \
+            --output=results.sarif
 
       - name: Upload SARIF results
         uses: github/codeql-action/upload-sarif@v3
