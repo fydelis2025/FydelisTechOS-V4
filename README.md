@@ -13,7 +13,8 @@
   <img src="https://github.com/fydelis2025/FydelisTechOS-V2/blob/main/assets/images/logo_menu.png" alt="FydelisTechOS Dashboard" width="40%">
 </p>
 
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/fydelis2025/FydelisTechOS-V4/badge?style=small)](https://scorecard.dev/viewer/?uri=github.com/fydelis2025/FydelisTechOS-V4)
+[![OpenSSF Scorecard](https://github.com/fydelis2025/FydelisTechOS-V4/actions/workflows/scorecard.yml/badge.svg)](https://github.com/fydelis2025/FydelisTechOS-V4/actions/workflows/scorecard.yml)
+
 
 
 Bem-vindo ao centro oficial de documentação do **FydelisTechOS — V2**. Aqui você encontra a visão completa do projeto: sua história, arquitetura, estado atual e os caminhos percorridos até chegar onde estamos.
