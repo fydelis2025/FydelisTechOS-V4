@@ -48,7 +48,14 @@ static int fyd_strlen(const char *s) {
 
 static void fyd_strcpy_lim(char *dst, const char *src, int max_len) {
     int i = 0;
-    while (src[i] && i < max_len - 1) {
+    if (!dst || !src || max_len <= 0) {
+        if (dst && max_len > 0) {
+            dst[0] = '\0';
+        }
+        return;
+    }
+
+    while (i < max_len - 1 && src[i]) {
         dst[i] = src[i];
         i++;
     }
