@@ -7,41 +7,39 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
-permissions:
-  contents: read
-  actions: read
-  security-events: write
-  id-token: write
+permissions: read-all
 
 jobs:
   analysis:
+    name: Scorecard analysis
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      id-token: write
+      contents: read
+      actions: read
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           persist-credentials: false
 
-      - name: Setup Go with cache
-        uses: actions/setup-go@v5
+      - name: Run analysis
+        uses: ossf/scorecard-action@v2.4.1
         with:
-          go-version: '1.27'
-          cache: true
+          results_file: results.sarif
+          results_format: sarif
+          publish_results: true
 
-      - name: Install OpenSSF Scorecard CLI
-        env:
-          GOPROXY: https://proxy.golang.org,direct
-        run: |
-          set -euo pipefail
-          go install github.com/ossf/scorecard/v5@latest
-          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SARIF file
+          path: results.sarif
+          retention-days: 5
 
-      - name: Run OpenSSF Scorecard
-        env:
-          GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          scorecard \
-            --repo="${{ github.repository }}" \
-            --show-details \
-            --format=default
+      - name: Upload to code-scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
