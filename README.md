@@ -37,6 +37,11 @@ O **FydelisTechOS-V4.2** passa por análise estática contínua via **CodeQL** e
 
 * 📄 **Artigo Técnico:** [Boas Práticas de Segurança no Desenvolvimento do FydelisTechOS V4.2 (DIO)](https://web.dio.me/articles/boas-praticas-de-seguranca-no-desenvolvimento-do-fydelistechos-v42-a4d47d84d31d)
 
+
+<p align="center">
+  <img src="https://github.com/fydelis2025/FydelisTechOS-V2/blob/main/assets/images/fydelistechos.png" alt="FydelisTechOS Dashboard" width="40%">
+</p>
+
 ## 📑 Índice Geral
 
 ### 📖 História e Evolução
