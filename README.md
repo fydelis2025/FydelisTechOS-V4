@@ -37,10 +37,20 @@ O **FydelisTechOS-V4.2** passa por análise estática contínua via **CodeQL** e
 
 * 📄 **Artigo Técnico:** [Boas Práticas de Segurança no Desenvolvimento do FydelisTechOS V4.2 (DIO)](https://web.dio.me/articles/boas-praticas-de-seguranca-no-desenvolvimento-do-fydelistechos-v42-a4d47d84d31d)
 
+## 📑 Nova Versão em desenvolvimento
 
 <p align="center">
   <img src="https://github.com/fydelis2025/FydelisTechOS-V2/blob/main/fydelistechos.png" alt="FydelisTechOS Dashboard" width="40%">
 </p>
+
+### 📋 O que vem por aí na v5.0:
+
+- ✅ **Nova estrutura de pastas** — organização profissional, padrão de kernels modernos
+- 🔄 **Migração dos drivers para C** — mais legível, portável e de fácil manutenção
+- 💾 **Assembly mantido apenas onde necessário** — boot, interrupções e acesso direto a hardware
+- 📦 **Sistema de compilação interno** — ferramentas nativas rodando dentro do próprio sistema
+- 🔄 **Módulo de atualizações (`fydupdate`)** — atualizações seguras via rede, com verificação e rollback
+- 📡 **Estabilização de subsistemas** — vídeo, rede, WiFi e Bluetooth
 
 ## 📑 Índice Geral
 
