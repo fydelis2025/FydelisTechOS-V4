@@ -39,7 +39,7 @@ O **FydelisTechOS-V4.2** passa por análise estática contínua via **CodeQL** e
 
 
 <p align="center">
-  <img src="https://github.com/fydelis2025/FydelisTechOS-V2/blob/main/assets/images/fydelistechos.png" alt="FydelisTechOS Dashboard" width="40%">
+  <img src="https://github.com/fydelis2025/FydelisTechOS-V2/blob/main/fydelistechos.png" alt="FydelisTechOS Dashboard" width="40%">
 </p>
 
 ## 📑 Índice Geral
